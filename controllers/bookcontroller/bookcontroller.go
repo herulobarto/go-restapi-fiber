@@ -26,11 +26,11 @@ func Show(c *fiber.Ctx) error {
 				"message": "Data tidak ditemukan",
 			})
 		}
-	}
 
-	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-		"message": "data tidak ditemukan",
-	})
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "data tidak ditemukan",
+		})
+	}
 
 	return c.JSON(book)
 
@@ -56,7 +56,26 @@ func Create(c *fiber.Ctx) error {
 }
 
 func Update(c *fiber.Ctx) error {
-	return nil
+
+	id := c.Params("id")
+
+	var book models.Book
+	if err := c.BodyParser(&book); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": err.Error(),
+		})
+	}
+
+	if models.DB.Where("id = ?", id).Updates(&book).RowsAffected == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "tidak dapat megupdate data",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "data berhasil diupdate",
+	})
+
 }
 
 func Delete(c *fiber.Ctx) error {
